@@ -1,5 +1,7 @@
 # StatusChecker
 
+![App Screenshot](image.png)
+
 A lightweight macOS menubar utility that monitors service status pages at a glance. A colored dot in your menubar tells you instantly if any of your services have issues — green means all clear, yellow means degraded, red means outage.
 
 Works with any service that uses [Atlassian Statuspage](https://www.atlassian.com/software/statuspage).
