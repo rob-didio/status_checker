@@ -3,6 +3,7 @@ import SwiftUI
 @main
 struct StatusCheckerApp: App {
     @StateObject private var monitor = StatusMonitor()
+    @StateObject private var notificationManager = NotificationManager()
 
     init() {
         NSApplication.shared.setActivationPolicy(.accessory)
@@ -10,7 +11,8 @@ struct StatusCheckerApp: App {
 
     var body: some Scene {
         MenuBarExtra {
-            StatusContentView(monitor: monitor)
+            StatusContentView(monitor: monitor, notificationManager: notificationManager)
+                .onAppear { monitor.notificationManager = notificationManager }
         } label: {
             MenuBarIcon(overallStatus: monitor.overallStatus)
         }

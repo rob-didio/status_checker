@@ -8,6 +8,8 @@ class StatusMonitor: ObservableObject {
     @Published var isLoading = false
     @Published var lastRefresh: Date?
 
+    var notificationManager: NotificationManager?
+
     private let client = StatusPageClient()
     private let store = ServiceStore()
     private var timerCancellable: AnyCancellable?
@@ -68,7 +70,15 @@ class StatusMonitor: ObservableObject {
                 }
             }
             for await (id, result) in group {
+                let oldSummary: StatusPageSummary? = {
+                    if case .success(let s) = results[id] { return s }
+                    return nil
+                }()
                 results[id] = result
+                if case .success(let newSummary) = result,
+                   let service = services.first(where: { $0.id == id }) {
+                    notificationManager?.processChanges(service: service, old: oldSummary, new: newSummary)
+                }
             }
         }
         lastRefresh = Date()
@@ -86,6 +96,7 @@ class StatusMonitor: ObservableObject {
         services.removeAll { $0.id == id }
         results.removeValue(forKey: id)
         store.save(services)
+        notificationManager?.removeSubscriptions(forService: id)
     }
 
     private func refreshService(_ service: MonitoredService) async {

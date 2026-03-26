@@ -3,6 +3,7 @@ import SwiftUI
 struct ServiceSectionView: View {
     let service: MonitoredService
     let result: Result<StatusPageSummary, Error>?
+    @ObservedObject var notificationManager: NotificationManager
     let onRemove: () -> Void
 
     @State private var isExpanded = false
@@ -38,6 +39,15 @@ struct ServiceSectionView: View {
 
                     Spacer()
 
+                    Button {
+                        Task { await notificationManager.toggleSubscription(to: .service(serviceId: service.id)) }
+                    } label: {
+                        Image(systemName: notificationManager.isSubscribed(to: .service(serviceId: service.id)) ? "bell.fill" : "bell")
+                            .font(.caption)
+                            .foregroundStyle(notificationManager.isSubscribed(to: .service(serviceId: service.id)) ? .blue : .secondary)
+                    }
+                    .buttonStyle(.borderless)
+
                     Text(serviceStatus.label)
                         .font(.caption)
                         .foregroundStyle(.secondary)
@@ -48,6 +58,10 @@ struct ServiceSectionView: View {
             .contextMenu {
                 Button("Open Status Page") {
                     NSWorkspace.shared.open(service.baseURL)
+                }
+                Button(notificationManager.isSubscribed(to: .service(serviceId: service.id))
+                       ? "Unsubscribe from Notifications" : "Subscribe to Notifications") {
+                    Task { await notificationManager.toggleSubscription(to: .service(serviceId: service.id)) }
                 }
                 Button("Remove", role: .destructive) {
                     onRemove()
@@ -64,7 +78,11 @@ struct ServiceSectionView: View {
                         }.sorted { $0.position < $1.position }
 
                         ForEach(visibleComponents) { component in
-                            ComponentRowView(component: component)
+                            ComponentRowView(
+                                component: component,
+                                serviceId: service.id,
+                                notificationManager: notificationManager
+                            )
                         }
 
                         if !summary.incidents.isEmpty {
