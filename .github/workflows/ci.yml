@@ -38,6 +38,10 @@ jobs:
           VERSION="${GITHUB_REF_NAME#v}"
           ./scripts/create-app-bundle.sh .build/universal/StatusChecker "$VERSION"
 
+      - name: Ad-hoc code sign
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: codesign --force --deep --sign - StatusChecker.app
+
       - name: Package release artifact
         if: startsWith(github.ref, 'refs/tags/v')
         run: |
