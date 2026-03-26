@@ -10,7 +10,11 @@ Works with any service that uses [Atlassian Statuspage](https://www.atlassian.co
 
 1. Download the latest `StatusChecker-vX.X.X.zip` from [Releases](https://github.com/rob-didio/status_checker/releases)
 2. Extract and drag `StatusChecker.app` to your Applications folder
-3. On first launch, right-click the app and select **Open** (required for unsigned apps)
+3. Before first launch, remove the quarantine attribute:
+   ```bash
+   xattr -cr /Applications/StatusChecker.app
+   ```
+4. Open the app normally
 
 Requires macOS 13 (Ventura) or later. Universal binary — runs natively on both Apple Silicon and Intel Macs.
 
