@@ -1,10 +1,14 @@
 import SwiftUI
 import AppKit
 
-struct MenuBarIcon: View {
-    let overallStatus: OverallStatusLevel
+public struct MenuBarIcon: View {
+    public let overallStatus: OverallStatusLevel
 
-    var body: some View {
+    public init(overallStatus: OverallStatusLevel) {
+        self.overallStatus = overallStatus
+    }
+
+    public var body: some View {
         Image(nsImage: makeCircle())
     }
 

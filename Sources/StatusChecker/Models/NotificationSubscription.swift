@@ -1,6 +1,6 @@
 import Foundation
 
-enum NotificationScope: Hashable {
+public enum NotificationScope: Hashable {
     case all
     case service(serviceId: UUID)
     case component(serviceId: UUID, componentId: String)
@@ -11,7 +11,7 @@ extension NotificationScope: Codable {
         case type, serviceId, componentId
     }
 
-    func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         switch self {
         case .all:
@@ -26,7 +26,7 @@ extension NotificationScope: Codable {
         }
     }
 
-    init(from decoder: Decoder) throws {
+    public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         let type = try container.decode(String.self, forKey: .type)
         switch type {
@@ -45,10 +45,14 @@ extension NotificationScope: Codable {
     }
 }
 
-struct NotificationSubscription: Codable, Identifiable, Hashable {
-    let scope: NotificationScope
+public struct NotificationSubscription: Codable, Identifiable, Hashable {
+    public let scope: NotificationScope
 
-    var id: String {
+    public init(scope: NotificationScope) {
+        self.scope = scope
+    }
+
+    public var id: String {
         switch scope {
         case .all:
             return "all"

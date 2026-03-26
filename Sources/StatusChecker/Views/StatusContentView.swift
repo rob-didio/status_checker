@@ -1,11 +1,16 @@
 import SwiftUI
 
-struct StatusContentView: View {
-    @ObservedObject var monitor: StatusMonitor
-    @ObservedObject var notificationManager: NotificationManager
+public struct StatusContentView: View {
+    @ObservedObject public var monitor: StatusMonitor
+    @ObservedObject public var notificationManager: NotificationManager
+
+    public init(monitor: StatusMonitor, notificationManager: NotificationManager) {
+        self.monitor = monitor
+        self.notificationManager = notificationManager
+    }
     @State private var showingAddService = false
 
-    var body: some View {
+    public var body: some View {
         VStack(spacing: 0) {
             if showingAddService {
                 AddServiceView(monitor: monitor, onDismiss: {

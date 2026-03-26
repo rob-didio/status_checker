@@ -1,44 +1,94 @@
 import Foundation
 import UserNotifications
 
+public protocol NotificationSender: Sendable {
+    func send(title: String, body: String)
+}
+
+struct BundleNotificationSender: NotificationSender {
+    func send(title: String, body: String) {
+        let content = UNMutableNotificationContent()
+        content.title = title
+        content.body = body
+        content.sound = .default
+
+        let request = UNNotificationRequest(
+            identifier: UUID().uuidString,
+            content: content,
+            trigger: nil
+        )
+
+        UNUserNotificationCenter.current().add(request)
+    }
+}
+
+struct OsascriptNotificationSender: NotificationSender {
+    func send(title: String, body: String) {
+        let escapedTitle = title.replacingOccurrences(of: "\"", with: "\\\"")
+        let escapedBody = body.replacingOccurrences(of: "\"", with: "\\\"")
+        let script = "display notification \"\(escapedBody)\" with title \"\(escapedTitle)\""
+
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: "/usr/bin/osascript")
+        process.arguments = ["-e", script]
+        try? process.run()
+    }
+}
+
 @MainActor
-class NotificationManager: ObservableObject {
-    @Published var subscriptions: Set<NotificationSubscription>
+public class NotificationManager: ObservableObject {
+    @Published public var subscriptions: Set<NotificationSubscription>
 
-    private let store = SubscriptionStore()
-    private var permissionGranted = false
-    private let hasBundle = Bundle.main.bundleIdentifier != nil
+    private let store: SubscriptionStore?
+    private let sender: NotificationSender
+    private var permissionGranted: Bool
+    private let hasBundle: Bool
 
-    init() {
-        subscriptions = SubscriptionStore().load()
+    public init() {
+        let store = SubscriptionStore()
+        self.store = store
+        self.subscriptions = store.load()
+        self.hasBundle = Bundle.main.bundleIdentifier != nil
+        self.sender = Bundle.main.bundleIdentifier != nil
+            ? BundleNotificationSender()
+            : OsascriptNotificationSender()
+        self.permissionGranted = false
+    }
+
+    public init(subscriptions: Set<NotificationSubscription> = [], sender: NotificationSender) {
+        self.store = nil
+        self.subscriptions = subscriptions
+        self.hasBundle = false
+        self.sender = sender
+        self.permissionGranted = true
     }
 
     // MARK: - Subscription management
 
-    func subscribe(to scope: NotificationScope) async {
+    public func subscribe(to scope: NotificationScope) async {
         guard await ensurePermission() else { return }
         let subscription = NotificationSubscription(scope: scope)
         subscriptions.insert(subscription)
-        store.save(subscriptions)
+        store?.save(subscriptions)
     }
 
-    func unsubscribe(from scope: NotificationScope) {
+    public func unsubscribe(from scope: NotificationScope) {
         let subscription = NotificationSubscription(scope: scope)
         subscriptions.remove(subscription)
-        store.save(subscriptions)
+        store?.save(subscriptions)
     }
 
-    func isSubscribed(to scope: NotificationScope) -> Bool {
+    public func isSubscribed(to scope: NotificationScope) -> Bool {
         subscriptions.contains(NotificationSubscription(scope: scope))
     }
 
-    func isEffectivelySubscribed(serviceId: UUID, componentId: String) -> Bool {
+    public func isEffectivelySubscribed(serviceId: UUID, componentId: String) -> Bool {
         isSubscribed(to: .all)
             || isSubscribed(to: .service(serviceId: serviceId))
             || isSubscribed(to: .component(serviceId: serviceId, componentId: componentId))
     }
 
-    func toggleSubscription(to scope: NotificationScope) async {
+    public func toggleSubscription(to scope: NotificationScope) async {
         if isSubscribed(to: scope) {
             unsubscribe(from: scope)
         } else {
@@ -46,7 +96,7 @@ class NotificationManager: ObservableObject {
         }
     }
 
-    func removeSubscriptions(forService serviceId: UUID) {
+    public func removeSubscriptions(forService serviceId: UUID) {
         subscriptions = subscriptions.filter { subscription in
             switch subscription.scope {
             case .all:
@@ -57,7 +107,7 @@ class NotificationManager: ObservableObject {
                 return sid != serviceId
             }
         }
-        store.save(subscriptions)
+        store?.save(subscriptions)
     }
 
     // MARK: - Permission
@@ -65,7 +115,6 @@ class NotificationManager: ObservableObject {
     private func ensurePermission() async -> Bool {
         if permissionGranted { return true }
         if !hasBundle {
-            // No proper app bundle (swift run) — osascript fallback always works
             permissionGranted = true
             return true
         }
@@ -81,7 +130,7 @@ class NotificationManager: ObservableObject {
 
     // MARK: - Change detection + notification dispatch
 
-    func processChanges(service: MonitoredService, old: StatusPageSummary?, new: StatusPageSummary) {
+    public func processChanges(service: MonitoredService, old: StatusPageSummary?, new: StatusPageSummary) {
         guard let old else { return }
 
         let oldComponents = Dictionary(uniqueKeysWithValues: old.components.map { ($0.id, $0) })
@@ -92,40 +141,10 @@ class NotificationManager: ObservableObject {
 
             guard isEffectivelySubscribed(serviceId: service.id, componentId: component.id) else { continue }
 
-            sendNotification(
+            sender.send(
                 title: service.name,
                 body: "\(component.name) is now \(component.status.displayName)"
             )
         }
-    }
-
-    private func sendNotification(title: String, body: String) {
-        if hasBundle {
-            let content = UNMutableNotificationContent()
-            content.title = title
-            content.body = body
-            content.sound = .default
-
-            let request = UNNotificationRequest(
-                identifier: UUID().uuidString,
-                content: content,
-                trigger: nil
-            )
-
-            UNUserNotificationCenter.current().add(request)
-        } else {
-            sendViaOsascript(title: title, body: body)
-        }
-    }
-
-    private func sendViaOsascript(title: String, body: String) {
-        let escapedTitle = title.replacingOccurrences(of: "\"", with: "\\\"")
-        let escapedBody = body.replacingOccurrences(of: "\"", with: "\\\"")
-        let script = "display notification \"\(escapedBody)\" with title \"\(escapedTitle)\""
-
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath: "/usr/bin/osascript")
-        process.arguments = ["-e", script]
-        try? process.run()
     }
 }

@@ -1,4 +1,5 @@
 import SwiftUI
+import StatusCheckerLib
 
 @main
 struct StatusCheckerApp: App {
