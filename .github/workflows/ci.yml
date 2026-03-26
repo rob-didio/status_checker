@@ -56,3 +56,13 @@ jobs:
           generate_release_notes: true
           draft: false
           prerelease: false
+          body: |
+            ## Installation
+
+            1. Download `StatusChecker-${{ github.ref_name }}.zip` below
+            2. Unzip and move `StatusChecker.app` to your Applications folder
+            3. On first launch, macOS will block the app. To open it run:
+               ```
+               xattr -cr /Applications/StatusChecker.app
+               ```
+               Then open the app normally.
