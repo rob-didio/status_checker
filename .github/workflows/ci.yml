@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build for arm64
+        run: swift build -c release --arch arm64
+
+      - name: Build for x86_64
+        run: swift build -c release --arch x86_64
+
+      - name: Create universal binary
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          mkdir -p .build/universal
+          lipo -create \
+            .build/arm64-apple-macosx/release/StatusChecker \
+            .build/x86_64-apple-macosx/release/StatusChecker \
+            -output .build/universal/StatusChecker
+          lipo -info .build/universal/StatusChecker
+
+      - name: Create app bundle
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          ./scripts/create-app-bundle.sh .build/universal/StatusChecker "$VERSION"
+
+      - name: Package release artifact
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          ditto -c -k --sequesterRsrc --keepParent StatusChecker.app \
+            "StatusChecker-${GITHUB_REF_NAME}.zip"
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: StatusChecker-*.zip
+          generate_release_notes: true
+          draft: false
+          prerelease: false
