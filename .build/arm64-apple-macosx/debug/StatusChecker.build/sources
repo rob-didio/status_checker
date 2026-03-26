@@ -1,0 +1,12 @@
+/Users/rob/Workspaces/status_checker/Sources/StatusChecker/App/StatusCheckerApp.swift
+/Users/rob/Workspaces/status_checker/Sources/StatusChecker/Models/MonitoredService.swift
+/Users/rob/Workspaces/status_checker/Sources/StatusChecker/Models/StatusPageModels.swift
+/Users/rob/Workspaces/status_checker/Sources/StatusChecker/Services/ServiceStore.swift
+/Users/rob/Workspaces/status_checker/Sources/StatusChecker/Services/StatusMonitor.swift
+/Users/rob/Workspaces/status_checker/Sources/StatusChecker/Services/StatusPageClient.swift
+/Users/rob/Workspaces/status_checker/Sources/StatusChecker/Views/AddServiceView.swift
+/Users/rob/Workspaces/status_checker/Sources/StatusChecker/Views/ComponentRowView.swift
+/Users/rob/Workspaces/status_checker/Sources/StatusChecker/Views/IncidentRowView.swift
+/Users/rob/Workspaces/status_checker/Sources/StatusChecker/Views/MenuBarIcon.swift
+/Users/rob/Workspaces/status_checker/Sources/StatusChecker/Views/ServiceSectionView.swift
+/Users/rob/Workspaces/status_checker/Sources/StatusChecker/Views/StatusContentView.swift

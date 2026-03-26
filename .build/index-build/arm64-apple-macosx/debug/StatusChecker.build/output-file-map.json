@@ -1,0 +1,19 @@
+{
+  "": {
+    "swift-dependencies": "/Users/rob/Workspaces/status_checker/.build/index-build/arm64-apple-macosx/debug/StatusChecker.build/primary.swiftdeps"
+  },
+  "/Users/rob/Workspaces/status_checker/Sources/StatusChecker/Models/MonitoredService.swift": {
+    "dependencies": "/Users/rob/Workspaces/status_checker/.build/index-build/arm64-apple-macosx/debug/StatusChecker.build/MonitoredService.d",
+    "object": "/Users/rob/Workspaces/status_checker/.build/index-build/arm64-apple-macosx/debug/StatusChecker.build/MonitoredService.swift.o",
+    "swiftmodule": "/Users/rob/Workspaces/status_checker/.build/index-build/arm64-apple-macosx/debug/StatusChecker.build/MonitoredService~partial.swiftmodule",
+    "swift-dependencies": "/Users/rob/Workspaces/status_checker/.build/index-build/arm64-apple-macosx/debug/StatusChecker.build/MonitoredService.swiftdeps",
+    "diagnostics": "/Users/rob/Workspaces/status_checker/.build/index-build/arm64-apple-macosx/debug/StatusChecker.build/MonitoredService.dia"
+  },
+  "/Users/rob/Workspaces/status_checker/Sources/StatusChecker/Models/StatusPageModels.swift": {
+    "dependencies": "/Users/rob/Workspaces/status_checker/.build/index-build/arm64-apple-macosx/debug/StatusChecker.build/StatusPageModels.d",
+    "object": "/Users/rob/Workspaces/status_checker/.build/index-build/arm64-apple-macosx/debug/StatusChecker.build/StatusPageModels.swift.o",
+    "swiftmodule": "/Users/rob/Workspaces/status_checker/.build/index-build/arm64-apple-macosx/debug/StatusChecker.build/StatusPageModels~partial.swiftmodule",
+    "swift-dependencies": "/Users/rob/Workspaces/status_checker/.build/index-build/arm64-apple-macosx/debug/StatusChecker.build/StatusPageModels.swiftdeps",
+    "diagnostics": "/Users/rob/Workspaces/status_checker/.build/index-build/arm64-apple-macosx/debug/StatusChecker.build/StatusPageModels.dia"
+  }
+}
