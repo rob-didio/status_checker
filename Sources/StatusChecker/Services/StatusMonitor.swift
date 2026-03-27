@@ -2,18 +2,20 @@ import SwiftUI
 import Combine
 
 @MainActor
-class StatusMonitor: ObservableObject {
-    @Published var services: [MonitoredService]
-    @Published var results: [UUID: Result<StatusPageSummary, Error>] = [:]
-    @Published var isLoading = false
-    @Published var lastRefresh: Date?
+public class StatusMonitor: ObservableObject {
+    @Published public var services: [MonitoredService]
+    @Published public var results: [UUID: Result<StatusPageSummary, Error>] = [:]
+    @Published public var isLoading = false
+    @Published public var lastRefresh: Date?
+
+    public var notificationManager: NotificationManager?
 
     private let client = StatusPageClient()
     private let store = ServiceStore()
     private var timerCancellable: AnyCancellable?
     private var wakeCancellable: AnyCancellable?
 
-    var overallStatus: OverallStatusLevel {
+    public var overallStatus: OverallStatusLevel {
         if results.isEmpty { return .unknown }
 
         var hasError = false
@@ -47,14 +49,14 @@ class StatusMonitor: ObservableObject {
         return .allOperational
     }
 
-    init() {
+    public init() {
         self.services = ServiceStore().load()
         startTimer()
         observeWake()
         Task { await refreshAll() }
     }
 
-    func refreshAll() async {
+    public func refreshAll() async {
         isLoading = true
         await withTaskGroup(of: (UUID, Result<StatusPageSummary, Error>).self) { group in
             for service in services {
@@ -68,24 +70,33 @@ class StatusMonitor: ObservableObject {
                 }
             }
             for await (id, result) in group {
+                let oldSummary: StatusPageSummary? = {
+                    if case .success(let s) = results[id] { return s }
+                    return nil
+                }()
                 results[id] = result
+                if case .success(let newSummary) = result,
+                   let service = services.first(where: { $0.id == id }) {
+                    notificationManager?.processChanges(service: service, old: oldSummary, new: newSummary)
+                }
             }
         }
         lastRefresh = Date()
         isLoading = false
     }
 
-    func addService(name: String, url: URL) {
+    public func addService(name: String, url: URL) {
         let service = MonitoredService(id: UUID(), name: name, baseURL: url)
         services.append(service)
         store.save(services)
         Task { await refreshService(service) }
     }
 
-    func removeService(id: UUID) {
+    public func removeService(id: UUID) {
         services.removeAll { $0.id == id }
         results.removeValue(forKey: id)
         store.save(services)
+        notificationManager?.removeSubscriptions(forService: id)
     }
 
     private func refreshService(_ service: MonitoredService) async {

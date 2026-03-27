@@ -2,59 +2,109 @@ import SwiftUI
 
 // MARK: - API Response Types
 
-struct StatusPageSummary: Codable {
-    let page: PageInfo
-    let components: [Component]
-    let incidents: [Incident]
-    let scheduledMaintenances: [Incident]
-    let status: OverallStatus
+public struct StatusPageSummary: Codable {
+    public let page: PageInfo
+    public let components: [Component]
+    public let incidents: [Incident]
+    public let scheduledMaintenances: [Incident]
+    public let status: OverallStatus
+
+    public init(page: PageInfo, components: [Component], incidents: [Incident], scheduledMaintenances: [Incident], status: OverallStatus) {
+        self.page = page
+        self.components = components
+        self.incidents = incidents
+        self.scheduledMaintenances = scheduledMaintenances
+        self.status = status
+    }
 }
 
-struct PageInfo: Codable {
-    let id: String
-    let name: String
-    let url: String
-    let updatedAt: String
+public struct PageInfo: Codable {
+    public let id: String
+    public let name: String
+    public let url: String
+    public let updatedAt: String
+
+    public init(id: String, name: String, url: String, updatedAt: String) {
+        self.id = id
+        self.name = name
+        self.url = url
+        self.updatedAt = updatedAt
+    }
 }
 
-struct Component: Codable, Identifiable {
-    let id: String
-    let name: String
-    let status: ComponentStatus
-    let position: Int
-    let description: String?
-    let onlyShowIfDegraded: Bool
-    let showcase: Bool?
-    let groupId: String?
-    let group: Bool?
+public struct Component: Codable, Identifiable {
+    public let id: String
+    public let name: String
+    public let status: ComponentStatus
+    public let position: Int
+    public let description: String?
+    public let onlyShowIfDegraded: Bool
+    public let showcase: Bool?
+    public let groupId: String?
+    public let group: Bool?
+
+    public init(id: String, name: String, status: ComponentStatus, position: Int, description: String? = nil, onlyShowIfDegraded: Bool = false, showcase: Bool? = nil, groupId: String? = nil, group: Bool? = nil) {
+        self.id = id
+        self.name = name
+        self.status = status
+        self.position = position
+        self.description = description
+        self.onlyShowIfDegraded = onlyShowIfDegraded
+        self.showcase = showcase
+        self.groupId = groupId
+        self.group = group
+    }
 }
 
-struct Incident: Codable, Identifiable {
-    let id: String
-    let name: String
-    let status: String
-    let impact: String
-    let shortlink: String?
-    let startedAt: String?
-    let incidentUpdates: [IncidentUpdate]
+public struct Incident: Codable, Identifiable {
+    public let id: String
+    public let name: String
+    public let status: String
+    public let impact: String
+    public let shortlink: String?
+    public let startedAt: String?
+    public let incidentUpdates: [IncidentUpdate]
+
+    public init(id: String, name: String, status: String, impact: String, shortlink: String? = nil, startedAt: String? = nil, incidentUpdates: [IncidentUpdate] = []) {
+        self.id = id
+        self.name = name
+        self.status = status
+        self.impact = impact
+        self.shortlink = shortlink
+        self.startedAt = startedAt
+        self.incidentUpdates = incidentUpdates
+    }
 }
 
-struct IncidentUpdate: Codable, Identifiable {
-    let id: String
-    let status: String
-    let body: String
-    let displayAt: String?
-    let updatedAt: String?
+public struct IncidentUpdate: Codable, Identifiable {
+    public let id: String
+    public let status: String
+    public let body: String
+    public let displayAt: String?
+    public let updatedAt: String?
+
+    public init(id: String, status: String, body: String, displayAt: String? = nil, updatedAt: String? = nil) {
+        self.id = id
+        self.status = status
+        self.body = body
+        self.displayAt = displayAt
+        self.updatedAt = updatedAt
+    }
 }
 
-struct OverallStatus: Codable {
-    let indicator: String
-    let description: String
+public struct OverallStatus: Codable {
+    public let indicator: String
+    public let description: String
+
+    public init(indicator: String, description: String) {
+        self.indicator = indicator
+        self.description = description
+    }
 }
 
 // MARK: - Component Status Enum
 
-enum ComponentStatus: String, Codable {
+public enum ComponentStatus: String, Codable {
     case operational
     case degradedPerformance = "degraded_performance"
     case partialOutage = "partial_outage"
@@ -62,13 +112,13 @@ enum ComponentStatus: String, Codable {
     case underMaintenance = "under_maintenance"
     case unknown
 
-    init(from decoder: Decoder) throws {
+    public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
         let rawValue = try container.decode(String.self)
         self = ComponentStatus(rawValue: rawValue) ?? .unknown
     }
 
-    var color: Color {
+    public var color: Color {
         switch self {
         case .operational: return .green
         case .degradedPerformance: return .yellow
@@ -79,7 +129,7 @@ enum ComponentStatus: String, Codable {
         }
     }
 
-    var displayName: String {
+    public var displayName: String {
         switch self {
         case .operational: return "Operational"
         case .degradedPerformance: return "Degraded Performance"
@@ -93,13 +143,13 @@ enum ComponentStatus: String, Codable {
 
 // MARK: - Overall Status Level
 
-enum OverallStatusLevel {
+public enum OverallStatusLevel {
     case allOperational
     case degraded
     case outage
     case unknown
 
-    var symbolName: String {
+    public var symbolName: String {
         switch self {
         case .allOperational: return "checkmark.circle.fill"
         case .degraded: return "exclamationmark.triangle.fill"
@@ -108,7 +158,7 @@ enum OverallStatusLevel {
         }
     }
 
-    var color: Color {
+    public var color: Color {
         switch self {
         case .allOperational: return .green
         case .degraded: return .yellow
@@ -117,7 +167,7 @@ enum OverallStatusLevel {
         }
     }
 
-    var accessibilityLabel: String {
+    public var accessibilityLabel: String {
         switch self {
         case .allOperational: return "All systems operational"
         case .degraded: return "Some services degraded"
@@ -126,7 +176,7 @@ enum OverallStatusLevel {
         }
     }
 
-    var label: String {
+    public var label: String {
         switch self {
         case .allOperational: return "Operational"
         case .degraded: return "Degraded"
@@ -135,7 +185,7 @@ enum OverallStatusLevel {
         }
     }
 
-    init(from summary: StatusPageSummary) {
+    public init(from summary: StatusPageSummary) {
         let components = summary.components.filter { $0.group != true }
         if components.contains(where: { $0.status == .majorOutage }) {
             self = .outage

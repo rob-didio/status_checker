@@ -7,9 +7,19 @@ let package = Package(
         .macOS(.v13)
     ],
     targets: [
+        .target(
+            name: "StatusCheckerLib",
+            path: "Sources/StatusChecker"
+        ),
         .executableTarget(
             name: "StatusChecker",
-            path: "Sources/StatusChecker"
+            dependencies: ["StatusCheckerLib"],
+            path: "Sources/StatusCheckerApp"
+        ),
+        .testTarget(
+            name: "StatusCheckerTests",
+            dependencies: ["StatusCheckerLib"],
+            path: "Tests/StatusCheckerTests"
         )
     ]
 )

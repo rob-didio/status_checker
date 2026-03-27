@@ -1,10 +1,16 @@
 import SwiftUI
 
-struct StatusContentView: View {
-    @ObservedObject var monitor: StatusMonitor
+public struct StatusContentView: View {
+    @ObservedObject public var monitor: StatusMonitor
+    @ObservedObject public var notificationManager: NotificationManager
+
+    public init(monitor: StatusMonitor, notificationManager: NotificationManager) {
+        self.monitor = monitor
+        self.notificationManager = notificationManager
+    }
     @State private var showingAddService = false
 
-    var body: some View {
+    public var body: some View {
         VStack(spacing: 0) {
             if showingAddService {
                 AddServiceView(monitor: monitor, onDismiss: {
@@ -30,6 +36,15 @@ struct StatusContentView: View {
                     ProgressView()
                         .controlSize(.small)
                 }
+
+                Button {
+                    Task { await notificationManager.toggleSubscription(to: .all) }
+                } label: {
+                    Image(systemName: notificationManager.isSubscribed(to: .all) ? "bell.fill" : "bell")
+                        .foregroundStyle(notificationManager.isSubscribed(to: .all) ? .blue : .secondary)
+                }
+                .buttonStyle(.borderless)
+                .help(notificationManager.isSubscribed(to: .all) ? "Unsubscribe from all notifications" : "Subscribe to all notifications")
 
                 Button {
                     Task { await monitor.refreshAll() }
@@ -69,6 +84,7 @@ struct StatusContentView: View {
                             ServiceSectionView(
                                 service: service,
                                 result: monitor.results[service.id],
+                                notificationManager: notificationManager,
                                 onRemove: { monitor.removeService(id: service.id) }
                             )
 
